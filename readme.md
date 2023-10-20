@@ -15,6 +15,7 @@ Install project dependencies with npm
 - User Registration and Login
 - Password Hashing
 - Session Storage
+- Follows MVC Architecture
 
 ## Tech Stack
 
