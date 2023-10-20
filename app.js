@@ -4,8 +4,8 @@ const app = express();
 const logger = require("morgan");
 const session = require("express-session");
 const { engine } = require("express-handlebars");
-const bcrypt = require("bcrypt");
 const User = require("./models/userModel");
+const helpers = require("./helpers/helpers");
 app.use(logger("dev"));
 app.use(
   session({
@@ -23,19 +23,6 @@ app.engine(".hbs", engine({ extname: ".hbs", defaultLayout: false }));
 app.set("views", `${__dirname}/views`);
 app.set("view engine", "hbs");
 
-const generateHash = (password) => {
-  return bcrypt.hashSync(password, 10);
-};
-
-//Function to check if current session is logged in
-const isAuth = (req, res, next) => {
-  if (req.session.isLoggedIn) {
-    next();
-  } else {
-    res.redirect("/");
-  }
-};
-
 app.get("/", (req, res) => {
   res.render("login");
 });
@@ -50,7 +37,7 @@ app.post("/register", async (req, res) => {
   console.log(userIdRequest);
   if (!userIdRequest) {
     const { username, password } = req.body;
-    const hashedPassword = generateHash(password);
+    const hashedPassword = helpers.generateHash(password);
     const newUser = new User({
       username,
       password: hashedPassword,
@@ -67,7 +54,7 @@ app.post("/register", async (req, res) => {
 });
 
 //View dashboard only when logged in
-app.get("/dashboard", isAuth, (req, res) => {
+app.get("/dashboard", helpers.isAuth, (req, res) => {
   const userName = req.session.user;
   res.render("dashboard", { userName });
 });
