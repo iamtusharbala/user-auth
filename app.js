@@ -6,6 +6,7 @@ const session = require("express-session");
 const { engine } = require("express-handlebars");
 const User = require("./models/userModel");
 const helpers = require("./helpers/helpers");
+const controller = require("./controller/controller");
 app.use(logger("dev"));
 app.use(
   session({
@@ -31,57 +32,9 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-// User registration
-app.post("/register", async (req, res) => {
-  const userIdRequest = await User.findOne({ username: req.body.username });
-  console.log(userIdRequest);
-  if (!userIdRequest) {
-    const { username, password } = req.body;
-    const hashedPassword = helpers.generateHash(password);
-    const newUser = new User({
-      username,
-      password: hashedPassword,
-    });
-    User.create(newUser);
-    res.status(201).json({
-      message: "User created successfully",
-    });
-  } else {
-    res.status(400).json({
-      message: "User already exists",
-    });
-  }
-});
-
 //View dashboard only when logged in
-app.get("/dashboard", helpers.isAuth, (req, res) => {
-  const userName = req.session.user;
-  res.render("dashboard", { userName });
-});
-
-//Login check
-app.post("/login", async (req, res) => {
-  const check = await User.findOne({ username: req.body.username });
-  if (check) {
-    const dbPassword = check.password;
-    const match = await bcrypt.compare(req.body.password, dbPassword);
-    if (match) {
-      req.session.isLoggedIn = true;
-      req.session.user = req.body.username;
-      res.redirect("/dashboard");
-    } else {
-      res.redirect("/");
-    }
-  } else {
-    console.log("You must be logged in");
-    res.redirect("/");
-  }
-});
-
-app.post("/logout", (req, res) => {
-  if (req.session.isLoggedIn) {
-    req.session.destroy();
-    res.redirect("/");
-  }
-});
+app.get("/dashboard", helpers.isAuth, controller.viewDashboard);
+app.post("/register", controller.userRegistration);
+app.post("/login", controller.userLogin);
+app.post("/logout", controller.isLoggedIn);
 module.exports = app;
