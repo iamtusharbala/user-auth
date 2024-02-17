@@ -1,6 +1,6 @@
 # user-auth
 
-User-auth is a simple user authentication using Node.js, Express ad MongoDb with Handlebars view engine.
+User-auth is a simple user authentication using Node.js, Express and MongoDb with Handlebars view engine.
 
 ## Installation
 
